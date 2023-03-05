@@ -8,9 +8,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_tab)
 
-        val animateView = findViewById<MaterialEditText>(R.id.animate_view)
+//        val animateView = findViewById<MaterialEditText>(R.id.animate_view)
 //        animateView.useLabel = false
 
 //        val circleObjectAnimator = ObjectAnimator.ofFloat(animateView, "radius",50.dp, 150.dp)
