@@ -72,7 +72,9 @@ class TouchScaleView(context: Context, attrs: AttributeSet?) : View(context, att
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         scaleGestureDetector.onTouchEvent(event)
-        gestureDetector.onTouchEvent(event)
+        if (!scaleGestureDetector.isInProgress) {
+            gestureDetector.onTouchEvent(event)
+        }
         return true
     }
 
