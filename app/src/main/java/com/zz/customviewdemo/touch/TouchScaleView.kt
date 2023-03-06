@@ -9,6 +9,8 @@ import android.view.GestureDetector
 import android.view.GestureDetector.OnDoubleTapListener
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.ScaleGestureDetector.OnScaleGestureListener
 import android.view.View
 import android.widget.OverScroller
 import androidx.core.animation.doOnEnd
@@ -37,18 +39,19 @@ class TouchScaleView(context: Context, attrs: AttributeSet?) : View(context, att
     private val gestureListener = GestureListener()
     private val flingRun = FlingRunner()
 
+    private val scaleGestureListener = ScaleGestureListener()
+    private val scaleGestureDetector = ScaleGestureDetector(context, scaleGestureListener)
     private val gestureDetector = GestureDetectorCompat(context, gestureListener)
 
     private val scroller = OverScroller(context)
-    private var scaleFactor = 0f
+
+    private var currentScale = 0f
         set(value) {
             field = value
             invalidate()
         }
 
-    private val animator: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(this, "scaleFactor", 0f, 1f)
-    }
+    private val animator = ObjectAnimator.ofFloat(this, "currentScale", smallScale, bigScale)
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -62,18 +65,23 @@ class TouchScaleView(context: Context, attrs: AttributeSet?) : View(context, att
             smallScale = height / bitmap.height.toFloat()
             bigScale = width / bitmap.width.toFloat() * EXTRA_SCALE_FACTOR
         }
+
+        currentScale = smallScale
+        animator.setFloatValues(smallScale, bigScale)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        return gestureDetector.onTouchEvent(event)
+        scaleGestureDetector.onTouchEvent(event)
+        gestureDetector.onTouchEvent(event)
+        return true
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas.translate(offsetX * scaleFactor, offsetY * scaleFactor)
-        val scale = smallScale + (bigScale - smallScale) * scaleFactor
-        canvas.scale(scale, scale, (width / 2).toFloat(), (height / 2).toFloat())
+        val localFraction = (currentScale - smallScale) / (bigScale - smallScale)
+        canvas.translate(offsetX * localFraction, offsetY * localFraction)
+        canvas.scale(currentScale, currentScale, (width / 2).toFloat(), (height / 2).toFloat())
         canvas.drawBitmap(bitmap, originalOffsetX, originalOffsetY, paint)
     }
 
@@ -84,6 +92,26 @@ class TouchScaleView(context: Context, attrs: AttributeSet?) : View(context, att
         offsetY = max(offsetY, -(bitmap.height * bigScale - height) / 2)
     }
 
+    inner class ScaleGestureListener : ScaleGestureDetector.OnScaleGestureListener {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val tempScale = currentScale * detector.scaleFactor
+            return if (tempScale > bigScale || tempScale < smallScale) {
+                false
+            } else{
+                currentScale *= detector.scaleFactor
+                true
+            }
+        }
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            offsetX = (detector.focusX - width / 2) * (1 - bigScale / smallScale)
+            offsetX = (detector.focusY - height / 2) * (1 - bigScale / smallScale)
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+        }
+    }
 
     inner class GestureListener : SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
