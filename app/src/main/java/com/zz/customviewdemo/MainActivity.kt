@@ -8,7 +8,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_touch_scale)
+        setContentView(R.layout.activity_layout_touch)
 
 //        val animateView = findViewById<MaterialEditText>(R.id.animate_view)
 //        animateView.useLabel = false
