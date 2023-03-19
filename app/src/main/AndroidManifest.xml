@@ -12,7 +12,7 @@
         android:theme="@style/Theme.CustomViewDemo"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".motionlayout.MotionLayoutActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
